@@ -1,3 +1,5 @@
+from urllib.error import URLError
+
 from pytube import YouTube
 from pytube import Playlist
 import os
@@ -40,24 +42,37 @@ def abook_downloader(playlist_link):
     path = make_author_folder(playlist_link)
     print(f'на канале {len(list_of_videos)} роликов')
     for i in range(len(list_of_videos)):
-        # logging.basicConfig(
-        #     level=logging.DEBUG,
-        #     filename="mylog.log",
-        #     format="%(asctime)s - %(module)s - %(levelname)s - %(funcName)s: %(lineno)d - %(message)s",
-        #     datefmt='%H:%M:%S',
-        # )
-        yt = YouTube(list_of_videos[i])
-        title = yt.title.replace('/', '')
+        logging.basicConfig(
+            level=logging.DEBUG,
+            filename="mylog.log",
+            format="%(asctime)s - %(module)s - %(levelname)s - %(funcName)s: %(lineno)d - %(message)s",
+            datefmt='%H:%M:%S',
+        )
+        try:
+            yt = YouTube(list_of_videos[i])
+            title = yt.title.replace('/', '')
+        except ConnectionResetError as exc:
+            print(f'{exc} - sleep for 5000 sec and start again')
+            time.sleep(5000)
+            abook_downloader(playlist_link)
+
         if check_file(f'{path}/{title}.mp4'):
             print("This file was downloaded")
         else:
             print(f"start download {title}")
             thumb_link = yt.thumbnail_url
             thumb_path = thumb_downloader(thumb_link, path)
-            stream = yt.streams.get_by_itag(140)  # скачиваю с фильтром по тэгу - только аудио
-            stream.download(path, f'{title}.mp4', skip_existing=True)
-            mp4_path = f'{path}/{title}.mp4'  # путь к медиа файлу
-            add_cover(thumb_path, mp4_path)
+            try:
+                stream = yt.streams.get_by_itag(140)  # скачиваю с фильтром по тэгу - только аудио
+                stream.download(path, f'{title}.mp4', skip_existing=True)
+                mp4_path = f'{path}/{title}.mp4'  # путь к медиа файлу
+                add_cover(thumb_path, mp4_path)
+            except URLError as ex:
+                time.sleep(100)
+                print(ex)
+                abook_downloader(playlist_link)
+
+
             with open(f"{path}/playlist.txt", 'a') as log_file:
                 log_file.write(f'{i} - {title}\n')
     print("download completed")
