@@ -7,7 +7,6 @@ import logging
 import time
 from pathlib import Path
 
-
 way = (Path.home() / "Movies" / "Youtube")
 
 
@@ -71,5 +70,5 @@ def music_downloader(playlist_link):
 
 
 if __name__ == "__main__":
-    playlist_link = 'https://youtube.com/playlist?list=PLv6k_E5x1Ddb-niDWSIY0gWqNQielehyP'
-    music_downloader(playlist_link)
+
+    music_downloader('https://music.youtube.com/playlist?list=LM')
