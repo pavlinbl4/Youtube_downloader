@@ -61,5 +61,4 @@ def abook_downloader(channel_link):
 
 
 if __name__ == "__main__":
-    channel_link = 'https://www.youtube.com/channel/UCxrrzmQZPeEHSCQmiR_BA-g'
-    abook_downloader(channel_link)
+    abook_downloader('https://www.youtube.com/@abramovichproduction')
