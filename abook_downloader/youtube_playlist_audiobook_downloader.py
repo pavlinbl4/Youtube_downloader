@@ -1,5 +1,4 @@
 from urllib.error import URLError
-
 from pytube import YouTube
 from pytube import Playlist
 import os
@@ -7,7 +6,7 @@ import requests
 from mutagen.mp4 import MP4, MP4Cover
 import logging
 import time
-from check_file_exist import check_file
+from pathlib import Path
 
 
 def make_author_folder(channel_link):  # создаю подпапку с названием канала
@@ -51,27 +50,27 @@ def abook_downloader(playlist_link):
         try:
             yt = YouTube(list_of_videos[i])
             title = yt.title.replace('/', '')
+            mp4_path = f'{path}/{title}.mp4'  # путь к медиа файлу
         except ConnectionResetError as exc:
             print(f'{exc} - sleep for 5000 sec and start again')
             time.sleep(5000)
             abook_downloader(playlist_link)
-
-        if check_file(f'{path}/{title}.mp4'):
+        if Path(mp4_path).exists():
             print("This file was downloaded")
         else:
             print(f"start download {title}")
             thumb_link = yt.thumbnail_url
             thumb_path = thumb_downloader(thumb_link, path)
             try:
-                stream = yt.streams.get_by_itag(140)  # скачиваю с фильтром по тэгу - только аудио
+                # stream = yt.streams.get_by_itag(249)  # скачиваю с фильтром по тэгу - только аудио
+                stream = yt.streams.get_by_itag(140)
                 stream.download(path, f'{title}.mp4', skip_existing=True)
-                mp4_path = f'{path}/{title}.mp4'  # путь к медиа файлу
+
                 add_cover(thumb_path, mp4_path)
             except URLError as ex:
                 time.sleep(100)
                 print(ex)
                 abook_downloader(playlist_link)
-
 
             with open(f"{path}/playlist.txt", 'a') as log_file:
                 log_file.write(f'{i} - {title}\n')
@@ -79,5 +78,5 @@ def abook_downloader(playlist_link):
 
 
 if __name__ == "__main__":
-    playlist_link = 'https://youtube.com/playlist?list=PL65ijVzWl9ksD5m5fRrFIlbWX2fGD-wYg'
-    abook_downloader(playlist_link)
+    youtube_playlist_link = 'https://www.youtube.com/playlist?list=PLNx8OU3F6dn5g5ozBiBawgFVNc_MAo8Cj'
+    abook_downloader(youtube_playlist_link)
